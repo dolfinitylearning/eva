@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EVA: Compute a tip</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/eva.css" property="css">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <script src="js/eva.js"></script>
+    <script src="js/jquery.inc-7.js"></script>
+  </head>
+  <body>
+    
+  <script>
+"use strict";
+var animalSound;
+(function($) {
+  animalSound = animalSound || {};
+  /**
+   * Reset (initalize). Callback. 
+   * Do things specific to this examnple. In this case,
+   * only need to reset the spreadsheet.
+   * @param {ExcelVbaVis} simEngine The Excel VBA visualization engine.
+   */
+  animalSound.reset = function( simEngine ) {
+    animalSound.resetSpreadsheet( simEngine );
+  };
+  /**
+   * Set up the spreadsheet, ready for running code.
+   * @param {ExcelVbaVis} simEngine The simulation engine.
+   */
+  animalSound.resetSpreadsheet = function( simEngine ) {
+    simEngine.setCellValue(1,1,"Favorite animal:");
+    simEngine.setCellValue(1,2,"dog");
+    simEngine.setCellValue(2,1,"Sound it makes:");
+  };
+  
+  animalSound.sourceCode = [
+    {
+      statementSourceCode: "'Declare variables",
+      animation: function(){
+        simEngine.initStep();
+        if ( ! simEngine.cpuHalted ) {
+          simEngine.move2NextStatement();
+        }
+        simEngine.showWhatHappened(
+          simEngine.whatHappened.comment
+        );
+        simEngine.finishStep();
+      }
+    },
+    {
+      statementSourceCode: 'Dim animal as String',
+      animation: function(){
+        var thisStatement, animalNVar;
+        thisStatement = this;
+        simEngine.initStep();
+        simEngine.allocateMemory("animal", "string");
+        animalNVar = simEngine.computeDomElementFromSpec({ 
+          elementType: "nVar", name: "animal" 
+        });
+        $.when(
+          simEngine.flashDomElement(animalNVar, thisStatement)
+        ).then(function(){
+          simEngine.setMemory("animal", simEngine.emptyVarIndicator);
+          if ( ! simEngine.cpuHalted ) {
+            simEngine.move2NextStatement();
+          }
+          simEngine.finishStep();
+          simEngine.showWhatHappened(
+            simEngine.whatHappened.declareVariable(
+              "animal", "string"
+            )
+          );
+        });
+      }
+    },  //End Dim animal.
+    {
+      statementSourceCode: 'Dim sound as String',
+      animation: function(){
+        var thisStatement, soundNVar;
+        thisStatement = this;
+        simEngine.initStep();
+        simEngine.allocateMemory("sound", "string");
+        soundNVar = simEngine.computeDomElementFromSpec({ 
+          elementType: "nVar", name: "sound" 
+        });
+        $.when(
+          simEngine.flashDomElement(soundNVar, thisStatement)
+        ).then(function(){
+          simEngine.setMemory("sound", simEngine.emptyVarIndicator);
+          if ( ! simEngine.cpuHalted ) {
+            simEngine.move2NextStatement();
+          }
+          simEngine.finishStep();
+          simEngine.showWhatHappened(
+            simEngine.whatHappened.declareVariable(
+              "sound", "string"
+            )
+          );
+        });
+      }
+    },  //End Dim sound.
+    {
+      statementSourceCode: "'Get data from worksheet",
+      animation: function(){
+        simEngine.initStep();
+        if ( ! simEngine.cpuHalted ) {
+          simEngine.move2NextStatement();
+        }
+        simEngine.showWhatHappened(
+          simEngine.whatHappened.comment
+        );
+        simEngine.finishStep();
+      }
+    },
+    {
+      statementSourceCode: "animal = {{Cells(1, 2)}}",
+      animation: function(){
+        var thisStatement, cell, animalNVar, evaluator, cellValue, message;
+        thisStatement = this;
+        simEngine.initStep(); //Hack.
+        cell = simEngine.computeDomElementFromSpec({
+          elementType: "cell", row: 1, col: 2
+        });
+        animalNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "animal"
+        });
+        if ( animalNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'animal' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+        $.when(
+          simEngine.flashDomElement(cell, thisStatement)
+        ).then(function(){
+          cellValue = simEngine.getCellValue(1, 2);
+          if ( cellValue == "" ) {
+            cellValue = simEngine.emptyVarIndicator;
+          }
+          $.when(
+            simEngine.moveFieldValue( cell, evaluator, thisStatement, cellValue )
+          ).then(function(){
+            simEngine.setEvaluator(cellValue);
+            $.when(
+              simEngine.flashDomElement( evaluator, thisStatement )
+            ).then(function(){
+              $.when(
+                simEngine.moveFieldValue( evaluator, animalNVar, thisStatement )
+              ).then(function(){
+                simEngine.setMemory("animal", cellValue);
+                $.when(
+                  simEngine.flashDomElement( animalNVar, thisStatement )
+                ).then(function(){
+                  if ( ! simEngine.cpuHalted ) {
+                    simEngine.move2NextStatement();
+                  }
+                  simEngine.showWhatHappened(
+                    simEngine.whatHappened.assignToMemory
+                  );
+                  simEngine.finishStep();
+                });
+              });
+            });
+          });
+        });
+      }
+    },
+    {
+    statementSourceCode: "'Compute sound",
+      animation: function(){
+        simEngine.initStep();
+        if ( ! simEngine.cpuHalted ) {
+          simEngine.move2NextStatement();
+        }
+        simEngine.showWhatHappened(
+          simEngine.whatHappened.comment
+        );
+        simEngine.finishStep();
+      }
+    },
+    {
+      statementSourceCode: "If {{animal = \"dog\"}} Then",
+      label: "if animal = dog",
+      animation: function(){
+        var thisStatement, expressionInStatement, animalNVar, evaluator, 
+                animal, message, testResult;
+        thisStatement = this;
+        simEngine.initStep();
+        expressionInStatement = simEngine.computeDomElementFromSpec({
+          elementType: "expressionInStatement", 
+          statementLabel: "if animal = dog"
+        });
+        animalNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "animal"
+        });
+        if ( animalNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'animal' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+        $.when(
+          simEngine.flashDomElement(expressionInStatement, thisStatement)
+        ).then(function(){
+          $.when(
+            simEngine.flashDomElement(animalNVar, thisStatement)
+          ).then(function(){
+            $.when(
+              simEngine.moveFieldValue( animalNVar, evaluator, thisStatement )
+            ).then(function(){
+              animal = simEngine.getMemory("animal");
+              testResult = ( animal == "dog" ) ? "True" : "False";
+              simEngine.setEvaluator( testResult );
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){
+                if ( ! simEngine.cpuHalted ) {
+                  if ( animal == "dog" ) {
+                    simEngine.move2NextStatement("animal is dog");
+                  }
+                  else {
+                    simEngine.move2NextStatement("elseif animal is cat");
+                  }
+                  simEngine.showWhatHappened(
+                    "The stuff between the If and the Then is a \"logical "
+                    + "expression,\" that is, something for the CPU to "
+                    + "compute that's either true or false. The CPU grabbed "
+                    + "the value of animal from memory, and compared it with 'dog'. "
+                    + "If the logical expression (the thing between If "
+                    + "and Then) was true (that is, animal was 'dog'), "
+                    + "the CPU put 8 into \"Next line,\" so that "
+                    + "line 8 would be run next. If the logical expression "
+                    + "was false (animal was not 'dog'), the CPU put 9 "
+                    + "into \"Next line.\""
+                  );
+                  simEngine.finishStep();
+                }
+              });
+            });
+          });
+        });
+      }
+    },
+    {
+      statementSourceCode: "    sound = {{\"woof\"}}",
+      label: "animal is dog",
+      animation: function(){
+        var thisStatement, soundNVar, evaluator, message;
+        thisStatement = this;
+        simEngine.initStep(); //Hack.
+        soundNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "sound"
+        });
+        if ( soundNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'sound' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+            simEngine.setEvaluator("woof");
+            $.when(
+              simEngine.flashDomElement( evaluator, thisStatement )
+            ).then(function(){
+              $.when(
+                simEngine.moveFieldValue( evaluator, soundNVar, thisStatement )
+              ).then(function(){
+                simEngine.setMemory("sound", "woof");
+                $.when(
+                  simEngine.flashDomElement(soundNVar, thisStatement)
+                ).then(function(){
+                  //Jump to after EndIf
+                  if ( ! simEngine.cpuHalted ) {
+                    simEngine.move2NextStatement("after if test");
+                  }          
+                  simEngine.showWhatHappened(
+                          simEngine.whatHappened.assignToMemory
+                  );
+                  simEngine.finishStep();
+                });
+              });
+            });
+      }
+    },
+    {
+      statementSourceCode: "ElseIf {{animal = \"cat\"}} Then",
+      label: "elseif animal is cat",
+      animation: function(){
+        var thisStatement, expressionInStatement, animalNVar, evaluator, 
+                animal, message, testResult;
+        thisStatement = this;
+        simEngine.initStep();
+        expressionInStatement = simEngine.computeDomElementFromSpec({
+          elementType: "expressionInStatement", 
+          statementLabel: "elseif animal is cat"
+        });
+        animalNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "animal"
+        });
+        if ( animalNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'animal' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+        $.when(
+          simEngine.flashDomElement(expressionInStatement, thisStatement)
+        ).then(function(){
+          $.when(
+            simEngine.flashDomElement(animalNVar, thisStatement)
+          ).then(function(){
+            $.when(
+              simEngine.moveFieldValue( animalNVar, evaluator, thisStatement )
+            ).then(function(){
+              animal = simEngine.getMemory("animal");
+              testResult = ( animal == "cat" ) ? "True" : "False";
+              simEngine.setEvaluator( testResult );
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){
+                if ( ! simEngine.cpuHalted ) {
+                  if ( animal == "cat" ) {
+                    simEngine.move2NextStatement("animal is cat");
+                  }
+                  else {
+                    simEngine.move2NextStatement("animal is not dog or cat");
+                  }
+                  simEngine.showWhatHappened(
+                    "Another test. The CPU grabbed "
+                    + "the value of animal from memory, and compared it with 'cat'. "
+                    + "If animal was 'cat'), "
+                    + "the CPU put 10 into \"Next line,\" so that "
+                    + "line 10 would be run next. If animal was not 'cat', the CPU put 12 "
+                    + "into \"Next line.\""
+                  );
+                  simEngine.finishStep();
+                }
+              });
+            });
+          });
+        });
+      }
+    },
+    {
+      statementSourceCode: "    sound = {{\"meow\"}}",
+      label: "animal is cat",
+      animation: function(){
+        var thisStatement, soundNVar, evaluator, message;
+        thisStatement = this;
+        simEngine.initStep(); //Hack.
+        soundNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "sound"
+        });
+        if ( soundNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'sound' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+            simEngine.setEvaluator("meow");
+            $.when(
+              simEngine.flashDomElement( evaluator, thisStatement )
+            ).then(function(){
+              $.when(
+                simEngine.moveFieldValue( evaluator, soundNVar, thisStatement )
+              ).then(function(){
+                simEngine.setMemory("sound", "meow");
+                $.when(
+                  simEngine.flashDomElement(soundNVar, thisStatement)
+                ).then(function(){
+                  //Jump to after EndIf
+                  if ( ! simEngine.cpuHalted ) {
+                    simEngine.move2NextStatement("after if test");
+                  }          
+                  simEngine.showWhatHappened(
+                          simEngine.whatHappened.assignToMemory
+                  );
+                  simEngine.finishStep();
+                });
+              });
+            });
+      }
+    },
+    {
+      statementSourceCode: "Else",
+      animation: function(){
+        simEngine.initStep();
+        if ( ! simEngine.cpuHalted ) {
+          simEngine.move2NextStatement();
+        }
+        simEngine.showWhatHappened(
+          simEngine.whatHappened.comment
+        );
+        simEngine.finishStep();
+      }
+    },
+    {
+      statementSourceCode: "    sound = {{\"Don't know\"}}",
+      label: "animal is not dog or cat",
+      animation: function(){
+        var thisStatement, soundNVar, evaluator, message;
+        thisStatement = this;
+        simEngine.initStep(); //Hack.
+        soundNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "sound"
+        });
+        if ( soundNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'sound' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+            simEngine.setEvaluator("Don't know");
+            $.when(
+              simEngine.flashDomElement( evaluator, thisStatement )
+            ).then(function(){
+              $.when(
+                simEngine.moveFieldValue( evaluator, soundNVar, thisStatement )
+              ).then(function(){
+                simEngine.setMemory("sound", "Don't know");
+                $.when(
+                  simEngine.flashDomElement(soundNVar, thisStatement)
+                ).then(function(){
+                  //Jump to after EndIf
+                  if ( ! simEngine.cpuHalted ) {
+                    simEngine.move2NextStatement("after if test");
+                  }          
+                  simEngine.showWhatHappened(
+                          simEngine.whatHappened.assignToMemory
+                  );
+                  simEngine.finishStep();
+                });
+              });
+            });
+      }
+    },
+    {
+      statementSourceCode: "EndIf",
+      animation: function(){
+        simEngine.initStep();
+        if ( ! simEngine.cpuHalted ) {
+          simEngine.move2NextStatement();
+        }
+        simEngine.showWhatHappened(
+          simEngine.whatHappened.comment
+        );
+        simEngine.finishStep();
+      }
+    },
+    {
+      statementSourceCode: "'Output to worksheet",
+      label: "after if test",
+      animation: function(){
+        simEngine.initStep();
+        if ( ! simEngine.cpuHalted ) {
+          simEngine.move2NextStatement();
+        }
+        simEngine.showWhatHappened(
+          simEngine.whatHappened.comment
+        );
+        simEngine.finishStep();
+      }
+    },
+    {
+      statementSourceCode: "Cells(2, 2) = {{sound}}",
+      animation: function(){
+        var thisStatement, cell, soundNVar, evaluator, sound, message;
+        thisStatement = this;
+        simEngine.initStep(); //Hack.
+        cell = simEngine.computeDomElementFromSpec({
+          elementType: "cell", row: 2, col: 2
+        });
+        soundNVar = simEngine.computeDomElementFromSpec({
+          elementType: "nVar", name: "sound"
+        });
+        if ( soundNVar.length == 0 ) {
+          message = simEngine.t(
+            "The variable 'sound' hasn't been declared."
+          );
+          simEngine.errorCpuHalt( message );
+          return;
+        }
+        evaluator = simEngine.computeDomElementFromSpec({
+          elementType: "evaluator"
+        });
+        $.when(
+          simEngine.flashDomElement(soundNVar, thisStatement)
+        ).then(function(){
+          $.when(
+            simEngine.moveFieldValue( soundNVar, evaluator, thisStatement )
+          ).then(function(){
+            sound = simEngine.getMemory( "sound" );
+            simEngine.setEvaluator( sound );
+            $.when(
+              simEngine.flashDomElement( evaluator, thisStatement )
+            ).then(function(){
+              $.when(
+                simEngine.moveFieldValue( evaluator, cell, thisStatement )
+              ).then(function(){
+                simEngine.setCellValue(2, 2, sound);
+                $.when(
+                  simEngine.flashDomElement( cell, thisStatement )
+                ).then(function(){
+                  if ( ! simEngine.cpuHalted ) {
+                    simEngine.move2NextStatement();
+                  }          
+                  simEngine.showWhatHappened(
+                    simEngine.whatHappened.assignToCell    
+                  );
+                  simEngine.finishStep();
+                });
+              });
+            });
+          });
+        });
+      }
+    }
+  ];
+  
+    var simEngine;
+    $(document).ready(function(){
+      //Load the HTML template. 
+      //See http://johannburkard.de/blog/programming/javascript/inc-a-super-tiny-client-side-include-javascript-jquery-plugin.html
+      $('#eva-template-location').inc('template/eva-template.html', null, 
+        function() {
+          //Callback once template is loaded. 
+          simEngine = new ExcelVbaAnimator(
+            $("#animal-sound-sim"), animalSound, 4, 4
+          );
+          simEngine.setup();
+        }
+      );
+    });
+  }(jQuery));
+  </script>
+  
+  <h1>Animate an Excel VBA program for showing an animal sound</h1>
+  
+  <!-- 
+    Where the simulation is run. Could use the template directly,
+    but this is not a good idea when there is more than one simulation on 
+    a page.
+  -->
+  <div id="animal-sound-sim" class="eva-wrapper"></div>
+
+  <!-- Place for loading the HTML template. -->
+  <div id="eva-template-location"></div>
+
+  </body>
+</html>

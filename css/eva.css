@@ -1,0 +1,236 @@
+/** {
+     margin: 0; 
+     padding: 0; 
+}
+
+body {
+  font-family: sans-serif;
+  padding: 1em;
+}
+
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+}*/
+
+.eva-wrapper {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.eva-spreadsheet {
+  padding: 5px;
+  border: 2px solid #C7C4C4;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.eva-spreadsheet table {
+  width: 100%;
+  padding: 5px;
+}
+
+.eva-spreadsheet table tr {
+   width: 100%; 
+}
+
+.eva-spreadsheet table tr th {
+  text-align: center;
+  padding-right: 0.5em;
+}
+
+.eva-spreadsheet table tr td {
+}
+
+.eva-spreadsheet table tr td input {
+   width: 100%; 
+   padding: 2px;
+}
+
+.runtime-error {
+  color: red;
+}
+
+.eva-component-explanation {
+  font-size: 80%;
+  margin-left: 8px;
+  color: green;
+}
+
+.eva-cpu-element-explanation {
+  font-size: 80%;
+  display: block;
+  margin-top: 5px;
+  color: green;
+}
+
+.eva-run-status-container .eva-cpu-element-explanation {
+  max-width: 100px;
+}
+
+.eva-next-instruction-container .eva-cpu-element-explanation {
+  max-width: 110px;
+}
+
+.eva-evaluator-container .eva-cpu-element-explanation {
+  max-width: 200px;
+}
+
+.eva-cpu-container {
+  margin: 5px;
+  padding: 5px;
+  background-color: bisque;
+}
+
+.eva-cpu-components {
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.eva-cpu-components .eva-cpu-element {
+  margin: 5px;
+  padding: 2px;
+}
+
+.eva-cpu-components .eva-next-instruction input {
+  width: 5em;
+  padding: 2px;
+}
+
+.eva-cpu-components span {
+  padding: 2px;
+}
+
+.eva-cpu-components #evaluator,
+.eva-cpu-components .eva-run-status {
+  display: inline-block;
+  border: 1px solid #BBB;
+  padding: 2px;
+  background-color: #F8F8F8;
+}
+
+.eva-cpu-components #evaluator {
+  width: 200px;
+}
+
+.eva-cpu-components .eva-run-status {
+  width: 70px;
+}
+
+.eva-cpu-components .eva-event-log {
+  font-size: 80%;
+  display: inline-block;
+  width: 200px;
+  height: 80px;
+  overflow-y: scroll;
+  border: 1px solid #BBB;
+  padding: 2px;
+  background-color: #F8F8F8;
+}
+
+
+.eva-label {
+  font-weight: bold;
+}
+
+.eva-code-memory-container {
+  display: flex;
+  justify-content: space-around;  
+}
+
+
+.eva-code {
+  vertical-align: top;
+  border: 2px solid #C7C4C4;
+  width: 49%; 
+  display: inline-block;
+  padding: 5px;
+  margin-left: 5px;
+}
+
+.eva-code ol {
+  padding-left: 0;
+  margin-left: 2em;
+}
+
+.eva-code ol li:nth-child(2n+1) {
+  background-color: #FAFAFA;
+}
+
+.eva-code ol li {
+  color: black;
+}
+
+.eva-code ol li pre {
+  margin: 0;
+  background-color: inherit;
+  color: inherit;
+  border: none;
+  padding: 0;
+  display: inline;
+}
+
+
+.eva-code ol li pre.current-statement {
+  background-color: yellow;
+}
+
+.eva-memory-container {
+  vertical-align: top;
+  border: 2px solid #C7C4C4;
+  width: 49%;  
+  display: inline-block;
+  margin-right: 5px;
+  padding: 5px;
+}
+
+.eva-memory p.animating {
+  background-color: yellow;
+}
+
+.eva-memory .nvar-overlay {
+  position: absolute;
+  background-color: #C7C4C4;
+  font-size: 100%;
+  opacity: 1;
+}
+
+.eva-memory .variable {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5em;
+}
+
+.eva-memory .variable .name-type-container {
+  /*display: inline-block;*/
+  flex-grow: 1;
+  width: 14em;
+}
+
+.eva-memory .variable .type {
+  font-size: 50%;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.eva-memory .variable .value {
+  flex-grow: 1;
+  /*display: inline-block;*/
+}
+
+.eva-memory .variable .value input {
+  width: 95%;
+}
+
+.eva-controls {
+  margin: 5px;
+  padding: 5px;
+  background-color: #F4F4F4;  
+}
+
+.eva-controls button {
+  padding: 2px;
+  margin: 4px;
+}

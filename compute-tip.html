@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EVA: Compute a tip</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/eva.css" property="css">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <script src="js/eva.js"></script>
+    <script src="js/jquery.inc-7.js"></script>
+  </head>
+  <body>
+    
+  <script>
+  "use strict";
+  var computeTip;
+  (function($) {
+    computeTip = computeTip || {};
+    
+    /**
+     * Reset (initalize). Callback. 
+     * Do things specific to this examnple. In this case,
+     * only need to reset the spreadsheet.
+     * @param {ExcelVbaAnimator} simEngine The Excel VBA visualization engine.
+     */
+    computeTip.reset = function( simEngine ) {
+      computeTip.resetSpreadsheet( simEngine );
+    };
+    
+    /**
+     * Set up the spreadsheet, ready for running code.
+     * @param {ExcelVbaAnimator} simEngine The simulation engine.
+     */
+    computeTip.resetSpreadsheet = function( simEngine ) {
+      simEngine.setCellValue(1,1,"Amount:");
+      simEngine.setCellValue(1,2,15);
+      simEngine.setCellValue(2,1,"Tip:");
+      simEngine.setCellValue(3,1,"Total:");
+    };
+    
+    /**
+     * VBA source code to simulate. 
+     */
+    computeTip.sourceCode = [
+      {
+        statementSourceCode: 'Dim amount as Single',
+        animation: function(){
+          var thisStatement, amount;
+          thisStatement = this;
+          simEngine.initStep();
+          simEngine.allocateMemory("amount", "single");
+          amount = simEngine.computeDomElementFromSpec({ 
+            elementType: "nVar", name: "amount" 
+          });
+          $.when(
+            simEngine.flashDomElement(amount, thisStatement)
+          ).then(function(){
+            simEngine.setMemory("amount", 0);
+            if ( ! simEngine.cpuHalted ) {
+              simEngine.move2NextStatement();
+            }
+            simEngine.finishStep();
+            simEngine.showWhatHappened(
+              simEngine.whatHappened.declareVariable(
+                "amount", "single"
+              )
+            );
+          });
+        }
+      },  //End Dim amount.
+      {
+        statementSourceCode: 'Dim tip as Single',
+        animation: function(){
+          var thisStatement, tip;
+          thisStatement = this;
+          simEngine.initStep();
+          simEngine.allocateMemory("tip", "single");
+          tip = simEngine.computeDomElementFromSpec({ 
+            elementType: "nVar", name: "tip" 
+          });
+          $.when(
+            simEngine.flashDomElement(tip, thisStatement)
+          ).then(function(){
+            simEngine.setMemory("tip", 0);
+            if ( ! simEngine.cpuHalted ) {
+              simEngine.move2NextStatement();
+            }
+            simEngine.finishStep();
+            simEngine.showWhatHappened(
+              simEngine.whatHappened.declareVariable(
+                "tip", "single"
+              )
+            );
+          });
+        }
+      },  //End Dim tip.
+      {
+        statementSourceCode: 'Dim total as Single',
+        animation: function(){
+          var thisStatement, total;
+          thisStatement = this;
+          simEngine.initStep();
+          simEngine.allocateMemory("total", "single");
+          total = simEngine.computeDomElementFromSpec({ 
+            elementType: "nVar", name: "total" 
+          });
+          $.when(
+            simEngine.flashDomElement(total, thisStatement)
+          ).then(function(){
+            simEngine.setMemory("total", 0);
+            if ( ! simEngine.cpuHalted ) {
+              simEngine.move2NextStatement();
+            }
+            simEngine.finishStep();
+            simEngine.showWhatHappened(
+              simEngine.whatHappened.declareVariable(
+                "total", "single"
+              )
+            );
+          });
+        }
+      },  //End Dim total.
+      {
+        statementSourceCode: "amount = {{Cells(1,2)}}",
+        animation: function(){
+          var thisStatement, cell, amountNVar, evaluator, cellValue, message;
+          thisStatement = this;
+          simEngine.initStep(); //Hack.
+          cell = simEngine.computeDomElementFromSpec({
+            elementType: "cell", row: 1, col: 2
+          });
+          amountNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "amount"
+          });
+          if ( amountNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'amount' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          evaluator = simEngine.computeDomElementFromSpec({
+            elementType: "evaluator"
+          });
+          $.when(
+            simEngine.flashDomElement(cell, thisStatement)
+          ).then(function(){
+            cellValue = simEngine.getCellValue(1, 2);
+            if ( cellValue == "" ) {
+              cellValue = simEngine.emptyVarIndicator;
+            }
+            $.when(
+              simEngine.moveFieldValue( cell, evaluator, thisStatement, cellValue )
+            ).then(function(){
+              simEngine.setEvaluator(cellValue);
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){
+                $.when(
+                  simEngine.moveFieldValue( evaluator, amountNVar, thisStatement )
+                ).then(function(){
+                  if ( cellValue === simEngine.emptyVarIndicator ) {
+                    cellValue = 0;
+                  }
+                  simEngine.setMemory("amount", parseFloat(cellValue));
+                  $.when(
+                    simEngine.flashDomElement( amountNVar, thisStatement )
+                  ).then(function(){
+                    if ( ! simEngine.cpuHalted ) {
+                      simEngine.move2NextStatement();
+                    }
+                    simEngine.showWhatHappened(
+                      "The CPU computed the thing on the right of the =, "
+                      + "and put the result in the variable on the "
+                      + "left of the =. The thing on the right is a "
+                      + "reference to a "
+                      + "cell in the worksheet: first row, second column. "
+                      + "That's B1 in the usual Excel notation. The result "
+                      + "went into the variable amount."
+                    );
+                    simEngine.finishStep();
+                  });
+                });
+              });
+            });
+          });
+        }
+      },
+      {
+        statementSourceCode: "tip = {{amount * 0.15}}",
+        animation: function(){
+          var thisStatement, amountNVar, tipNVar, evaluator, amount, 
+              amountBy015, message;
+          thisStatement = this;
+          simEngine.initStep(); //Hack.
+          amountNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "amount"
+          });
+          if ( amountNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'amount' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          tipNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "tip"
+          });
+          if ( tipNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'tip' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          evaluator = simEngine.computeDomElementFromSpec({
+            elementType: "evaluator"
+          });
+          $.when(
+            simEngine.flashDomElement(amountNVar, thisStatement)
+          ).then(function(){
+            $.when(
+              simEngine.moveFieldValue( amountNVar, evaluator, thisStatement )
+            ).then(function(){
+              amount = simEngine.getMemory("amount");
+              if ( amount === simEngine.emptyVarIndicator || isNaN( amount ) ) {
+                message = simEngine.t( 
+                  "Data type mismatch. Can't multiply a string by 0.15."
+                );
+                simEngine.errorCpuHalt( message );
+                return;
+              }
+              amountBy015 = amount * 0.15;
+              simEngine.setEvaluator(amountBy015);
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){            
+                $.when(
+                  simEngine.moveFieldValue( evaluator, tipNVar, thisStatement )
+                ).then(function(){
+                  simEngine.setMemory("tip", parseFloat(amountBy015));
+                  $.when(
+                    simEngine.flashDomElement(tipNVar, thisStatement)
+                  ).then(function(){
+                    if ( ! simEngine.cpuHalted ) {
+                      simEngine.move2NextStatement();
+                    }          
+                    simEngine.showWhatHappened(
+                      simEngine.whatHappened.assignToMemory
+                      + " \"*\" means multiply."      
+                    );
+                    simEngine.finishStep();
+                  });
+                });
+              });
+            });
+          });
+        }
+      },
+      {
+        statementSourceCode: "total = {{amount + tip}}",
+        animation: function(){
+          var thisStatement, amountNVar, tipNVar, totalNVar, evaluator, 
+              amount, tip, total, message;
+          thisStatement = this;
+          simEngine.initStep(); //Hack.
+          amountNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "amount"
+          });
+          if ( amountNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'amount' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          tipNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "tip"
+          });
+          if ( tipNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'tip' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          totalNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "total"
+          });
+          if ( totalNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'total' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          evaluator = simEngine.computeDomElementFromSpec({
+            elementType: "evaluator"
+          });
+          $.when(
+            simEngine.flashDomElement(amountNVar, thisStatement),
+            simEngine.flashDomElement(tipNVar, thisStatement)
+          ).then(function(){
+            $.when(
+              simEngine.moveFieldValue( amountNVar, evaluator, thisStatement ),
+              simEngine.moveFieldValue( tipNVar, evaluator, thisStatement )
+            ).then(function(){
+              amount = simEngine.getMemory("amount");
+              if ( amount === simEngine.emptyVarIndicator || isNaN( amount ) ) {
+                message = simEngine.t( 
+                  "Data type mismatch. Can't add strings."
+                );
+                simEngine.errorCpuHalt( message );
+                return;
+              }
+              tip = simEngine.getMemory("tip");
+              if ( amount === simEngine.emptyVarIndicator || isNaN( tip ) ) {
+                message = simEngine.t( 
+                  "Data type mismatch. Can't add strings."
+                );
+                simEngine.errorCpuHalt( message );
+                return;
+              }
+              total = parseFloat(amount) + parseFloat(tip);
+              simEngine.setEvaluator(total);
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){            
+                $.when(
+                  simEngine.moveFieldValue( evaluator, totalNVar, thisStatement )
+                ).then(function(){
+                  simEngine.setMemory("total", total);
+                  $.when(
+                    simEngine.flashDomElement(totalNVar, thisStatement)
+                  ).then(function(){
+                    if ( ! simEngine.cpuHalted ) {
+                      simEngine.move2NextStatement();
+                    }          
+                    simEngine.showWhatHappened(
+                      simEngine.whatHappened.assignToMemory
+                    );
+                    simEngine.finishStep();
+                  });
+                });
+              });
+            });
+          });
+        }
+      },
+      {
+        statementSourceCode: "Cells(2, 2) = {{tip}}",
+        animation: function(){
+          var thisStatement, cell, tipNVar, evaluator, tip, message;
+          thisStatement = this;
+          simEngine.initStep(); //Hack.
+          cell = simEngine.computeDomElementFromSpec({
+            elementType: "cell", row: 2, col: 2
+          });
+          tipNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "tip"
+          });
+          if ( tipNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'tip' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          evaluator = simEngine.computeDomElementFromSpec({
+            elementType: "evaluator"
+          });
+          $.when(
+            simEngine.flashDomElement(tipNVar, thisStatement)
+          ).then(function(){
+            $.when(
+              simEngine.moveFieldValue( tipNVar, evaluator, thisStatement )
+            ).then(function(){
+              tip = simEngine.getMemory( "tip" );
+              simEngine.setEvaluator( tip );
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){
+                $.when(
+                  simEngine.moveFieldValue( evaluator, cell, thisStatement )
+                ).then(function(){
+                  simEngine.setCellValue(2, 2, tip);
+                  $.when(
+                    simEngine.flashDomElement( cell, thisStatement )
+                  ).then(function(){
+                    if ( ! simEngine.cpuHalted ) {
+                      simEngine.move2NextStatement();
+                    }          
+                    simEngine.showWhatHappened(
+                      simEngine.whatHappened.assignToCell    
+                    );
+                    simEngine.finishStep();
+                  });
+                });
+              });
+            });
+          });
+        }
+      },
+      {
+        statementSourceCode: "Cells(3, 2) = {{total}}",
+        animation: function(){
+          var thisStatement, cell, totalNVar, evaluator, total, message;
+          thisStatement = this;
+          simEngine.initStep(); //Hack.
+          cell = simEngine.computeDomElementFromSpec({
+            elementType: "cell", row: 3, col: 2
+          });
+          totalNVar = simEngine.computeDomElementFromSpec({
+            elementType: "nVar", name: "total"
+          });
+          if ( totalNVar.length == 0 ) {
+            message = simEngine.t(
+              "The variable 'total' hasn't been declared."
+            );
+            simEngine.errorCpuHalt( message );
+            return;
+          }
+          evaluator = simEngine.computeDomElementFromSpec({
+            elementType: "evaluator"
+          });
+          $.when(
+            simEngine.flashDomElement(totalNVar, thisStatement)
+          ).then(function(){
+            $.when(
+              simEngine.moveFieldValue( totalNVar, evaluator, thisStatement )
+            ).then(function(){
+              total = simEngine.getMemory( "total" );
+              simEngine.setEvaluator( total );
+              $.when(
+                simEngine.flashDomElement( evaluator, thisStatement )
+              ).then(function(){
+                $.when(
+                  simEngine.moveFieldValue( evaluator, cell, thisStatement )
+                ).then(function(){
+                  simEngine.setCellValue(3, 2, total);
+                  $.when(
+                    simEngine.flashDomElement( cell, thisStatement )
+                  ).then(function(){
+                    if ( ! simEngine.cpuHalted ) {
+                      simEngine.move2NextStatement();
+                    }          
+                    simEngine.showWhatHappened(
+                      simEngine.whatHappened.assignToCell    
+                    );
+                    simEngine.finishStep();
+                  });
+                });
+              });
+            });
+          });
+        }
+      }
+    ];
+
+    var simEngine;
+    $(document).ready(function(){
+      //Load the HTML template. 
+      //See http://johannburkard.de/blog/programming/javascript/inc-a-super-tiny-client-side-include-javascript-jquery-plugin.html
+      $('#eva-template-location').inc('template/eva-template.html', null, 
+        function() {
+          //Callback once template is loaded. 
+          simEngine = new ExcelVbaAnimator(
+            $("#compute-tip-sim"), computeTip, 4, 4
+          );
+          simEngine.setup();
+        }
+      );
+    });
+  }(jQuery));
+  </script>
+  
+  <h1>Animate an Excel VBA program for computing a tip</h1>
+  
+  <!-- 
+    Where the simulation is run. Could use the template directly,
+    but this is not a good idea when there is more than one simulation on 
+    a page.
+  -->
+  <div id="compute-tip-sim" class="eva-wrapper"></div>
+
+  <!-- Place for loading the HTML template. -->
+  <div id="eva-template-location"></div>
+
+  </body>
+</html>

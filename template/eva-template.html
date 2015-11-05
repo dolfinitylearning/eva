@@ -1,0 +1,66 @@
+<div id="eva-template" style="display: none;">
+  <div class="eva-spreadsheet">
+    <span class="eva-label">Worksheet</span>
+    <span class="eva-component-explanation">
+      You can change any of the cells.
+    </span>
+  </div>
+  <div class="eva-cpu-container">
+    <span class="eva-label">CPU</span>
+    <span class="eva-component-explanation">
+      The CPU runs the program, and does all the calculations.
+    </span>
+    <div class="eva-cpu-components">
+      <span class="eva-run-status-container eva-cpu-element">
+        <span class="eva-label">Run status</span><br> 
+        <span class="eva-run-status"></span>
+        <span class="eva-cpu-element-explanation">
+          Whether the CPU is running a program or not.
+        </span>
+      </span>
+      <span class="eva-next-instruction-container eva-cpu-element">
+        <span class="eva-label">Next line</span><br>
+        <span class="eva-next-instruction">
+          <input type="text">
+        </span>
+        <span class="eva-cpu-element-explanation">
+          Next line of the program to be run.<br><br>
+          You can change it.
+        </span>
+      </span>
+      <span class="eva-evaluator-container eva-cpu-element">
+        <span class="eva-label">Evaluator</span><br>
+        <span id="evaluator">&nbsp;</span>
+        <span class="eva-cpu-element-explanation">
+          Where the CPU does calculations.
+        </span>
+      </span>
+      <span class="eva-event-log-container eva-cpu-element">
+        <span class="eva-label">What just happened</span><br>
+        <span class="eva-event-log">&nbsp;</span>
+      </span>
+    </div>
+    <p class="eva-cpu-message eva-cpu-element"></p>
+  </div>
+  <div class="eva-code-memory-container">
+    <div class="eva-code">
+    <span class="eva-label">Program</span>
+    <span class="eva-component-explanation">
+      The code someone typed.
+    </span>
+    <ol>
+      </ol>
+    </div>
+    <div class="eva-memory-container">
+      <span class="eva-label">Memory</span>
+      <span class="eva-component-explanation">
+        Where variables are created. You can change their values.
+      </span>
+      <div class="eva-memory"></div>
+    </div>
+  </div>
+  <div class="eva-controls">
+    <button type="button" class="eva-step">Run next line</button>
+    <button type="button" class="eva-reset">Reset</button>
+  </div>
+</div>
